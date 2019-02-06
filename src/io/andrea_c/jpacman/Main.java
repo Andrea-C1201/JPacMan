@@ -7,37 +7,69 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
 import io.andrea_c.jpacman.graphics.Screen;
+import io.andrea_c.jpacman.graphics.layer.Layer;
+import io.andrea_c.jpacman.input.Input;
+import io.andrea_c.jpacman.level.Level;
 
 public class Main extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int WIDTH = 800, HEIGHT = 600;
-	private static final String TITLE = "JPacMan";
-
-	private int[] pixels;
-	private BufferedImage image;
-
-	private JFrame frame;
-	private Screen screen;
+	private static int width = 684;// 912(scale = 4);
+	private static int height = 774;// 992(scale = 4);
+	//current scale=3
+	public static String title = "JPacMan";
 
 	private Thread thread;
+	private JFrame frame;
 	private boolean running = false;
 
+	private Screen screen;
+	private BufferedImage image;
+	private int[] pixels;
+
+	private Input input;
+
+	private List<Layer> layerStack = new ArrayList<Layer>();
+
 	public Main() {
-		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		setMinimumSize(new Dimension(WIDTH, HEIGHT));
-		setMaximumSize(new Dimension(WIDTH, HEIGHT));
-		frame = new JFrame();
-		screen = new Screen(WIDTH, HEIGHT);
-		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		Dimension size = new Dimension(width, height);
+		setPreferredSize(size);
+
+		image = new BufferedImage(width / 3, height / 3, BufferedImage.TYPE_INT_RGB);
 		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+		input = new Input();
+		addKeyListener(input);
+
+		screen = new Screen(width / 3, height / 3);
+		frame = new JFrame();
+
+		Level l = new Level(0);
+		layerStack.add(l);
+
 	}
 
-	@Override
+	public synchronized void start() {
+		running = true;
+		thread = new Thread(this, title);
+		thread.start();
+	}
+
+	public synchronized void stop() {
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void run() {
 		long lastTime = System.nanoTime();
 		long timer = System.currentTimeMillis();
@@ -61,11 +93,19 @@ public class Main extends Canvas implements Runnable {
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
 				System.out.println(updates + " ups, " + frames + " fps");
+				frame.setTitle(title + "  |  " + updates + " ups, " + frames + " fps");
 				updates = 0;
 				frames = 0;
 			}
 		}
 		stop();
+	}
+
+	public void update() {
+		input.update();
+		for (int i = 0; i < layerStack.size(); i++) {
+			layerStack.get(i).update();
+		}
 	}
 
 	public void render() {
@@ -74,49 +114,35 @@ public class Main extends Canvas implements Runnable {
 			createBufferStrategy(3);
 			return;
 		}
+
 		screen.clear();
 
-		for (int i = 0; i < pixels.length; i++)
+		for (int i = 0; i < layerStack.size(); i++) {
+			layerStack.get(i).render(screen);
+		}
+
+		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
-		Graphics g = getGraphics();
-		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, WIDTH, HEIGHT);
-		g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+		}
+		Graphics g = bs.getDrawGraphics();
+		g.setColor(new Color(0xff00ff));
+		g.fillRect(0, 0, getWidth(), getHeight());
+		g.drawImage(image, 0, 0, width, height, null);
 		g.dispose();
 		bs.show();
 	}
 
-	public void update() {
-
-	}
-
-	public synchronized void start() {
-		running = true;
-		thread = new Thread(this, TITLE);
-		thread.start();
-	}
-
-	public synchronized void stop() {
-		running = false;
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static void main(String[] args) {
-		Main m = new Main();
+		Main game = new Main();
+		game.frame.setResizable(false);
+		game.frame.setTitle(Main.title);
+		game.frame.add(game);
+		game.frame.pack();
+		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		game.frame.setLocationRelativeTo(null);
+		game.frame.setVisible(true);
 
-		m.frame.setResizable(false);
-		m.frame.setTitle(TITLE);
-		m.frame.add(m);
-		m.frame.pack();
-		m.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		m.frame.setLocationRelativeTo(null);
-		m.frame.setVisible(true);
-
-		m.start();
+		game.start();
 	}
 
 }
