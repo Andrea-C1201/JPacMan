@@ -20,9 +20,9 @@ import io.andrea_c.jpacman.level.Level;
 public class Main extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 
-	private static int width = 684;// 912(scale = 4);
-	private static int height = 774;// 992(scale = 4);
-	//current scale=3
+	private static int scale = 3;
+	private static int width = 224 * scale;// 912(scale = 4);
+	private static int height = 248*scale;// 992(scale = 4);
 	public static String title = "JPacMan";
 
 	private Thread thread;
@@ -51,6 +51,8 @@ public class Main extends Canvas implements Runnable {
 		frame = new JFrame();
 
 		Level l = new Level(0);
+		l.setInputManager(input);
+		l.initLevel();
 		layerStack.add(l);
 
 	}
@@ -124,6 +126,7 @@ public class Main extends Canvas implements Runnable {
 		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
 		}
+		
 		Graphics g = bs.getDrawGraphics();
 		g.setColor(new Color(0xff00ff));
 		g.fillRect(0, 0, getWidth(), getHeight());

@@ -2,11 +2,14 @@ package io.andrea_c.jpacman.graphics.assets;
 
 public class Sprite {
 
-	private SpriteSheet sheet;
+	protected SpriteSheet sheet;
 	private int x, y, width, height;
 	private int[] pixels;
 
-	public static Sprite sprite = new Sprite(SpriteSheet.datasheet, 0, 0, 16);
+	public static Sprite pacman_right = new Sprite(SpriteSheet.datasheet, 1, 0, 16);
+	public static Sprite pacman_left = new Sprite(SpriteSheet.datasheet, 1, 1, 16);
+	public static Sprite pacman_up = new Sprite(SpriteSheet.datasheet, 1, 2, 16);
+	public static Sprite pacman_down = new Sprite(SpriteSheet.datasheet, 1, 3, 16);
 
 	public Sprite(SpriteSheet sheet, int x, int y, int size) {
 		this.sheet = sheet;
@@ -16,6 +19,24 @@ public class Sprite {
 		this.height = size;
 		this.pixels = new int[width * height];
 		load();
+	}
+
+	protected Sprite(SpriteSheet sheet, int width, int height) {
+		//SIZE = (width == height) ? width : -1;
+		this.width = width;
+		this.height = height;
+		this.sheet = sheet;
+	}
+	
+	public Sprite(int[] pixels, int width, int height) {
+		//SIZE = (width == height) ? width : -1;
+		this.width = width;
+		this.height = height;
+		this.pixels = new int[pixels.length];
+		for (int i = 0; i < pixels.length; i++) {
+			this.pixels[i] = pixels[i];
+		}
+
 	}
 
 	private void load() {
@@ -34,16 +55,8 @@ public class Sprite {
 		return height;
 	}
 
-	public int[] getSprite() {
+	public int[] getSpritePixels() {
 		return this.pixels;
-	}
-	
-	public Sprite getScaledSprite(Sprite sprite, int scaleFactor) {
-		return null;
-	}
-	
-	private void scale(int scaleFactor, int[] pixels){
-		
 	}
 
 }

@@ -5,26 +5,49 @@ import java.util.List;
 
 import io.andrea_c.jpacman.entity.Entity;
 import io.andrea_c.jpacman.entity.Mob;
+import io.andrea_c.jpacman.entity.Pacman;
 import io.andrea_c.jpacman.graphics.Screen;
-import io.andrea_c.jpacman.graphics.assets.SpriteSheet;
 import io.andrea_c.jpacman.graphics.layer.Layer;
+import io.andrea_c.jpacman.input.Input;
+import io.andrea_c.jpacman.level.tile.Tile;
+import io.andrea_c.jpacman.level.tile.Tiles;
 
 public class Level extends Layer {
 
+	private Tile[] tiles;
+
+	private Pacman player;
 	private List<Entity> items = new ArrayList<Entity>();
 	private List<Mob> ghosts = new ArrayList<Mob>();
 
-	public Level(int levelId) {
+	private Input input;
 
-		initLevel();
+	public Level(int levelId) {
+		super("Texture");
+		Tiles.init();
 	}
 
-	private void initLevel() {
-
+	public void initLevel() {
+		player = new Pacman(input, this, 116, 22);
+		tiles = new Tile[super.getTextureData().length];
+		for (int i = 0; i < tiles.length; i++) {
+			tiles[i] = Tiles.createTile(super.getTextureData()[i], super.getCollisionData()[i]);
+			// tiles[i] = Tiles.getTileByTextureId(super.getTextureData()[i]);
+		}
 	}
 
 	private void renderBackground(Screen screen) {
-		screen.renderSheet(SpriteSheet.background, 0, 0);
+		int x = 0;
+		int y = 0;
+		for (int i = 0; i < tiles.length; i++) {
+			if (tiles[i] != null)
+				screen.renderTile(tiles[i], x, y);
+			x++;
+			if (x >= screen.getWidth()) {
+				y++;
+				x = 0;
+			}
+		}
 	}
 
 	@Override
@@ -38,6 +61,7 @@ public class Level extends Layer {
 		for (int i = 0; i < ghosts.size(); i++) {
 			ghosts.get(i).render(screen);
 		}
+		player.render(screen);
 	}
 
 	@Override
@@ -49,6 +73,18 @@ public class Level extends Layer {
 		for (int i = 0; i < ghosts.size(); i++) {
 			ghosts.get(i).update();
 		}
+		player.update();
+	}
+
+	public void setInputManager(Input input) {
+		this.input = input;
+	}
+
+	public Tile getTile(int x, int y) {
+		int val = x + y * getWidth();
+		if (val > 0 && val < tiles.length)
+			return tiles[val];
+		return null;
 	}
 
 }
