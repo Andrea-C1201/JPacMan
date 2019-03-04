@@ -5,12 +5,12 @@ import io.andrea_c.jpacman.graphics.assets.AnimatedSprite;
 import io.andrea_c.jpacman.graphics.assets.Sprite;
 import io.andrea_c.jpacman.graphics.assets.SpriteSheet;
 import io.andrea_c.jpacman.input.Input;
-import io.andrea_c.jpacman.level.Level;
 
 public class Pacman extends Mob {
 
 	private Input input;
-	private Level level;
+
+	private boolean walking = false;
 
 	private AnimatedSprite pacman_up = new AnimatedSprite(SpriteSheet.pacman_up, 16, 16, 2, 20);
 	private AnimatedSprite pacman_down = new AnimatedSprite(SpriteSheet.pacman_down, 16, 16, 2, 20);
@@ -18,10 +18,9 @@ public class Pacman extends Mob {
 	private AnimatedSprite pacman_right = new AnimatedSprite(SpriteSheet.pacman_right, 16, 16, 2, 20);
 	private AnimatedSprite animSprite = pacman_up;
 
-	public Pacman(Input input, Level level, int x, int y) {
+	public Pacman(Input input, int x, int y) {
 		super(Sprite.pacman_up, x, y);
 		this.input = input;
-		this.level = level;
 	}
 
 	@Override
@@ -32,56 +31,31 @@ public class Pacman extends Mob {
 
 	@Override
 	public void update() {
-		if (moving)
+		if (walking)
 			animSprite.update();
 		else
 			animSprite.setFrame(0);
-		super.update();
-	}
 
-	@Override
-	public void move() {
+		int xa = 0, ya = 0;
 		if (input.up) {
-			dir = Direction.UP;
 			animSprite = pacman_up;
+			ya -= 1;
 		} else if (input.down) {
-			dir = Direction.DOWN;
 			animSprite = pacman_down;
+			ya += 1;
 		} else if (input.left) {
-			dir = Direction.LEFT;
 			animSprite = pacman_left;
+			xa -= 1;
 		} else if (input.right) {
-			dir = Direction.RIGHT;
 			animSprite = pacman_right;
-		} else {
-			dir = Direction.STOP;
+			xa += 1;
 		}
-		collide();
-		super.move();
-	}
-
-	private void collide() {
-		/*if (dir == Direction.UP) {
-			if (box.collideWithTile(level.getTile(x, y - 1))) {
-				moving = false;
-			} else
-				moving = true;
-		} else if (dir == Direction.DOWN) {
-			if (box.collideWithTile(level.getTile(x, y + 1))) {
-				moving = false;
-			} else
-				moving = true;
-		} else*/ if (dir == Direction.LEFT) {
-			if (box.collideWithTile(level.getTile(x - 1, y))) {
-				moving = false;
-			} else
-				moving = true;
-		} /*else if (dir == Direction.RIGHT) {
-			if (box.collideWithTile(level.getTile(x + 1, y))) {
-				moving = false;
-			} else
-				moving = true;
-		}*/
+		if (xa != 0 || ya != 0) {
+			move(xa, ya);
+			walking = true;
+		} else {
+			walking = false;
+		}
 	}
 
 }

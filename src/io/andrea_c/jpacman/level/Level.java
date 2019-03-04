@@ -28,7 +28,7 @@ public class Level extends Layer {
 	}
 
 	public void initLevel() {
-		player = new Pacman(input, this, 116, 22);
+		player = new Pacman(input, 116, 22);
 		tiles = new Tile[super.getTextureData().length];
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i] = Tiles.createTile(super.getTextureData()[i], super.getCollisionData()[i]);

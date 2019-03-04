@@ -15,14 +15,14 @@ import javax.swing.JFrame;
 import io.andrea_c.jpacman.graphics.Screen;
 import io.andrea_c.jpacman.graphics.layer.Layer;
 import io.andrea_c.jpacman.input.Input;
-import io.andrea_c.jpacman.level.Level;
+import io.andrea_c.jpacman.level.LevelManager;
 
 public class Main extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 
 	private static int scale = 3;
 	private static int width = 224 * scale;// 912(scale = 4);
-	private static int height = 248*scale;// 992(scale = 4);
+	private static int height = 248 * scale;// 992(scale = 4);
 	public static String title = "JPacMan";
 
 	private Thread thread;
@@ -50,10 +50,8 @@ public class Main extends Canvas implements Runnable {
 		screen = new Screen(width / 3, height / 3);
 		frame = new JFrame();
 
-		Level l = new Level(0);
-		l.setInputManager(input);
-		l.initLevel();
-		layerStack.add(l);
+		LevelManager.createLevel(input);
+		layerStack.add(LevelManager.level);
 
 	}
 
@@ -126,7 +124,7 @@ public class Main extends Canvas implements Runnable {
 		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
 		}
-		
+
 		Graphics g = bs.getDrawGraphics();
 		g.setColor(new Color(0xff00ff));
 		g.fillRect(0, 0, getWidth(), getHeight());
